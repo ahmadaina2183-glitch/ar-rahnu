@@ -62,13 +62,18 @@
             <option value="full">Tebus Penuh</option>
             <option value="upah">Kiraan Upah 6/12/18 Bulan</option>
           </select>
+          <div id="goldPriceBox">
+            <label>Harga Emas Semasa / gram (RM)</label>
+            <input id="calcGoldPrice" type="number" min="0" step="0.01" placeholder="Contoh: 380" />
+            <p class="muted">Formula: Pembiayaan Baru - Pembiayaan Lama - Upah = Cash-out / Jumlah perlu dibayar</p>
+          </div>
           <div id="partialBox">
             <label>Pilih Item Untuk Tebus</label>
             <div id="calcItems" class="check-list"></div>
           </div>
           <div id="overlapBox" hidden>
-            <label>Pinjaman Baru / Renewal (RM)</label>
-            <input id="newLoanAmount" type="number" min="0" step="0.01" placeholder="Contoh: 3000" />
+            <label>Pembiayaan Baru Manual (optional)</label>
+            <input id="newLoanAmount" type="number" min="0" step="0.01" placeholder="Auto: total gram aktif × harga emas semasa" />
             <label>Tempoh Baru (bulan)</label>
             <input id="newTenure" type="number" min="1" step="1" value="6" />
           </div>
