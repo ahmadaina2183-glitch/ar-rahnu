@@ -65,7 +65,13 @@
           <div id="goldPriceBox">
             <label>Harga Emas Semasa / gram (RM)</label>
             <input id="calcGoldPrice" type="number" min="0" step="0.01" placeholder="Contoh: 380" />
-            <p class="muted">Formula: Pembiayaan Baru - Pembiayaan Lama - Upah = Cash-out / Jumlah perlu dibayar</p>
+            <label>Ratio Pembiayaan (LTV)</label>
+            <select id="calcLtvRatio">
+              <option value="0.70">70%</option>
+              <option value="0.75">75%</option>
+              <option value="0.80" selected>80%</option>
+            </select>
+            <p class="muted">Nilai Marhun = berat × harga emas. Pembiayaan Baru = Nilai Marhun × ratio. Formula: Pembiayaan Baru - Pembiayaan Lama - Upah = Cash-out / Jumlah perlu dibayar</p>
           </div>
           <div id="partialBox">
             <label>Pilih Item Untuk Tebus</label>
