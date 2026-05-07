@@ -11,7 +11,8 @@ let currentImageData='';
 let currentImageFile=null;
 
 const pageTitles={dashboard:'Dashboard',senarai:'Senarai Surat',detail:'Detail Surat',kiraan:'Kiraan',upload:'Upload Surat',harga:'Harga Gadaian'};
-function save(){localStorage.setItem(KEY,JSON.stringify(tickets));renderAll();}
+async function syncToSupabase(){try{const store=window.arRahnuSupabaseStore;if(!store?.enabled)return false;await store.syncAll(tickets);return true;}catch(err){console.warn('Supabase sync failed, fallback localStorage active:',err);return false;}}
+function save(){localStorage.setItem(KEY,JSON.stringify(tickets));syncToSupabase();renderAll();}
 function go(page){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(`page-${page}`).classList.add('active');$('pageTitle').textContent=pageTitles[page]||'Ar-Rahnu';document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.nav===page));if(page==='kiraan')renderCalcOptions();if(page==='harga')renderGoldPrices();window.scrollTo({top:0,behavior:'smooth'});}
 document.addEventListener('click',e=>{const btn=e.target.closest('[data-nav]');if(btn)go(btn.dataset.nav);});
 
@@ -69,4 +70,5 @@ $('seedBtn').addEventListener('click',()=>{tickets=[{id:uid(),ticketNo:'G001',cu
 function renderAll(){renderDashboard();renderList();renderCalcOptions();if(currentDetailId)renderDetail();}
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;$('installBtn').hidden=false;});$('installBtn').addEventListener('click',async()=>{if(deferredInstallPrompt){deferredInstallPrompt.prompt();deferredInstallPrompt=null;$('installBtn').hidden=true;}});
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
-resetForm();renderAll();
+async function bootData(){const store=window.arRahnuSupabaseStore;if(store?.enabled){try{const remote=await store.loadTickets();if(remote?.length){tickets=remote;localStorage.setItem(KEY,JSON.stringify(tickets));}}catch(err){console.warn('Supabase load failed, using localStorage:',err);}}renderAll();}
+resetForm();bootData();
