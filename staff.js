@@ -174,9 +174,12 @@ function renderReports() {
 
 function renderAll() { renderOverview(); renderTickets(); renderCustomers(); renderReports(); }
 
+let currentStaffTab = 'overview';
 function openTab(tab) {
+  currentStaffTab = tab;
   document.querySelectorAll('.staff-tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
   document.querySelectorAll('.staff-panel').forEach((p) => p.classList.toggle('active', p.id === `staff-${tab}`));
+  $('staffBackBtn').hidden = tab === 'overview';
   $('staffTitle').textContent = { overview: 'Overview', surat: 'Manage Surat', customers: 'Manage Customer', reports: 'Report' }[tab] || 'Staff Panel';
 }
 
@@ -252,6 +255,7 @@ $('customerForm').addEventListener('submit', async (e) => {
 });
 
 $('staffRefreshBtn').addEventListener('click', loadStaff);
+$('staffBackBtn')?.addEventListener('click', () => currentStaffTab === 'overview' ? history.back() : openTab('overview'));
 $('staffTicketSearch').addEventListener('input', renderTickets);
 $('staffStatusFilter').addEventListener('change', renderTickets);
 $('staffCustomerSearch').addEventListener('input', renderCustomers);

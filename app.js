@@ -30,8 +30,9 @@ async function apiRefreshGoldPrices(){const json=await apiJson('/api/gold-prices
 
 const pageTitles={dashboard:'Dashboard',senarai:'Senarai Surat',detail:'Detail Surat',kiraan:'Kiraan',upload:'Upload Surat',harga:'Harga Gadaian',profile:'Profile',history:'History'};
 function save(){localStorage.setItem(KEY,JSON.stringify(tickets));renderAll();}
-function go(page){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(`page-${page}`).classList.add('active');$('pageTitle').textContent=pageTitles[page]||'Ar-Rahnu';document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.nav===page));if(page==='kiraan')renderCalcOptions();if(page==='harga')renderGoldPrices();if(page==='history')renderHistoryPage();if(page==='profile')loadProfile();window.scrollTo({top:0,behavior:'smooth'});}
+function go(page){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(`page-${page}`).classList.add('active');$('pageTitle').textContent=pageTitles[page]||'Ar-Rahnu';$('appBackBtn').hidden=page==='dashboard';document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.nav===page));if(page==='kiraan')renderCalcOptions();if(page==='harga')renderGoldPrices();if(page==='history')renderHistoryPage();if(page==='profile')loadProfile();window.scrollTo({top:0,behavior:'smooth'});}
 document.addEventListener('click',e=>{const btn=e.target.closest('[data-nav]');if(btn)go(btn.dataset.nav);});
+$('appBackBtn')?.addEventListener('click',()=>go('dashboard'));
 
 function monthsBetween(start,end=new Date()){const s=new Date(start);return Math.max(0,(end.getFullYear()-s.getFullYear())*12+(end.getMonth()-s.getMonth())+(end.getDate()>=s.getDate()?0:-1));}
 function addMonths(date,months){const d=new Date(date);d.setMonth(d.getMonth()+Number(months||0));return d;}

@@ -52,3 +52,5 @@ async function submitAuth() {
 $('loginBtn').addEventListener('click', submitAuth);
 document.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitAuth(); });
 renderMode();
+
+$('loginBackBtn')?.addEventListener('click', () => { if (history.length > 1) history.back(); else location.href = APP_BASE; });

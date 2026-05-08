@@ -6,12 +6,13 @@
   <meta name="theme-color" content="#0d2b5e" />
   <title>Ar-Rahnu Pro</title>
   <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./styles.css?v=20260508-backbtn" />
 </head>
 <body data-role="customer">
-  <script src="./auth-guard.js?v=20260508-httpsapi"></script>
+  <script src="./auth-guard.js?v=20260508-backbtn"></script>
   <div class="app-shell">
     <header class="topbar">
+      <button class="top-back-btn" id="appBackBtn" type="button" aria-label="Back" hidden>←</button>
       <div>
         <p class="eyebrow">Ar-Rahnu Pro</p>
         <h1 id="pageTitle">Dashboard</h1>
@@ -223,6 +224,6 @@
     };
   </script>
   <script type="module" src="./supabase-adapter.js"></script>
-  <script src="./app.js?v=20260508-httpsapi"></script>
+  <script src="./app.js?v=20260508-backbtn"></script>
 </body>
 </html>
