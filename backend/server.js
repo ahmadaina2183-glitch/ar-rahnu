@@ -259,6 +259,49 @@ app.post('/api/auth/login', (req, res) => {
   res.json({ ok: true, role, token, redirect: role === 'admin' ? '/admin.html' : '/staff.html' });
 });
 
+
+function stripTags(value = '') {
+  return String(value).replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
+}
+function tagValue(xml, tag) {
+  const match = String(xml || '').match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i'));
+  return stripTags(match?.[1] || '');
+}
+function summarizeGoldNews(title = '', description = '') {
+  const text = `${title}. ${description}`.toLowerCase();
+  if (/war|conflict|gaza|ukraine|iran|israel|geopolitical|military/.test(text)) return 'Geopolitik / perang boleh tambah permintaan safe-haven emas.';
+  if (/fed|rate|inflation|dollar|treasury|yield|cpi|interest/.test(text)) return 'Kadar faedah, USD dan inflasi boleh gerakkan harga emas.';
+  if (/central bank|reserve|buying|china|india/.test(text)) return 'Pembelian bank pusat dan permintaan Asia boleh jadi catalyst emas.';
+  if (/record|high|rally|surge|price|gold/.test(text)) return 'Pergerakan harga emas global boleh beri kesan nilai marhun.';
+  return 'Pantau catalyst global kerana ia boleh mempengaruhi sentimen emas.';
+}
+app.get('/api/news/gold', async (_req, res) => {
+  try {
+    const query = encodeURIComponent('gold price war global economy catalyst OR geopolitics');
+    const url = `https://news.google.com/rss/search?q=${query}&hl=en-MY&gl=MY&ceid=MY:en`;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 8000);
+    const response = await fetch(url, { signal: ctrl.signal, headers: { 'User-Agent': 'ArRahnuPro/1.0' } });
+    clearTimeout(timer);
+    if (!response.ok) throw new Error(`News source ${response.status}`);
+    const xml = await response.text();
+    const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)].slice(0, 8).map((m) => {
+      const raw = m[1];
+      const title = tagValue(raw, 'title').replace(/\s+-\s+[^-]+$/, '').trim();
+      const link = tagValue(raw, 'link');
+      const publishedAt = tagValue(raw, 'pubDate');
+      const description = tagValue(raw, 'description');
+      return { title, link, publishedAt, summary: summarizeGoldNews(title, description), tag: 'Gold Catalyst' };
+    }).filter((x) => x.title && x.link);
+    res.json({ ok: true, updatedAt: new Date().toISOString(), source: 'Google News RSS', items });
+  } catch (err) {
+    res.json({ ok: true, updatedAt: new Date().toISOString(), source: 'fallback', items: [
+      { title: 'Gold watch: geopolitik, USD dan kadar faedah kekal catalyst utama', summary: 'Pantau perang, inflasi, keputusan Fed dan pergerakan USD kerana semua ini boleh gerakkan emas.', tag: 'Gold Catalyst', link: '' },
+      { title: 'Safe-haven demand boleh naik bila risiko global meningkat', summary: 'Jika konflik atau ketidaktentuan ekonomi meningkat, emas sering jadi aset perlindungan.', tag: 'Global Risk', link: '' }
+    ], error: err.message });
+  }
+});
+
 app.get('/api/auth/me', (req, res) => {
   const auth = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
   const user = verifyToken(auth);
