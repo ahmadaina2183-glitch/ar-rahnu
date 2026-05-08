@@ -8,14 +8,15 @@
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="stylesheet" href="./styles.css" />
 </head>
-<body>
+<body data-role="customer">
+  <script src="./auth-guard.js"></script>
   <div class="app-shell">
     <header class="topbar">
       <div>
         <p class="eyebrow">Ar-Rahnu Pro</p>
         <h1 id="pageTitle">Dashboard</h1>
       </div>
-      <button class="icon-btn" id="installBtn" hidden>Install</button>
+      <button class="icon-btn" id="installBtn" hidden>Install</button><button class="icon-btn logout-btn" onclick="arrahnuLogout()">Logout</button>
     </header>
 
     <main>
@@ -26,7 +27,8 @@
           <button class="quick-card" data-nav="kiraan">🧮<span>Kiraan</span></button>
           <button class="quick-card" data-nav="senarai">📋<span>Senarai</span></button>
           <button class="quick-card" data-nav="harga">🏦<span>Harga</span></button>
-          <button class="quick-card" id="seedBtn">✨<span>Demo Data</span></button>
+          <button class="quick-card" data-nav="history">🧾<span>History</span></button>
+          <button class="quick-card" data-nav="profile">👤<span>Profile</span></button>
         </div>
         <section class="card">
           <h2>Upah Overview</h2>
@@ -75,6 +77,9 @@
             <p class="muted">Nilai Marhun = berat × harga emas. Pembiayaan Baru = Nilai Marhun × ratio. Formula: Pembiayaan Baru - Pembiayaan Lama - Upah = Cash-out / Jumlah perlu dibayar</p>
           </div>
           <div id="partialBox">
+            <label>Tebus Manual Ikut Gram</label>
+            <input id="manualRedeemGram" type="number" min="0" step="0.01" placeholder="Contoh: 5.00 gram" />
+            <p class="muted">Kalau isi gram manual, app kira ikut jumlah berat aktif. Kalau kosong, boleh tick item bawah.</p>
             <label>Pilih Item Untuk Tebus</label>
             <div id="calcItems" class="check-list"></div>
           </div>
@@ -84,21 +89,39 @@
             <label>Tempoh Baru (bulan)</label>
             <input id="newTenure" type="number" min="1" step="1" value="6" />
           </div>
+          <div id="upahBox" hidden>
+            <label>Jenis Bayaran Upah</label>
+            <select id="upahPayMode">
+              <option value="installment" selected>Bayaran Manual / Ansuran</option>
+              <option value="current">Bayar Upah Semasa</option>
+              <option value="fullBlock">Cukupkan 6 Bulan</option>
+            </select>
+            <label>Jumlah Bayar Sekarang (RM)</label>
+            <input id="upahInstallmentAmount" type="number" min="0" step="0.01" placeholder="Contoh: 100.00" />
+            <p class="muted">Isi nilai sebenar customer bayar. Contoh bayar RM100, sistem simpan RM100 dan tolak dari baki upah 6 bulan.</p>
+          </div>
           <button class="primary-btn" id="runCalcBtn">Kira Sekarang</button>
           <div id="calcResult" class="result-box muted">Pilih surat dan jenis kiraan dahulu.</div>
           <button class="primary-btn" id="applyPartialBtn" hidden>✅ Tebus Keluar / Confirm</button>
+          <button class="primary-btn" id="payUpahBtn" hidden>✅ Bayar Upah / Confirm</button>
         </section>
       </section>
 
       <section class="page" id="page-upload">
         <section class="card">
           <h2>Upload Surat Gadaian</h2>
-          <p class="muted">MVP: preview gambar + placeholder Vision OCR. Nanti backend OpenAI Vision akan isi field automatik.</p>
+          <p class="muted">Ambil 2 gambar: page depan untuk maklumat pembiayaan, page belakang untuk senarai marhun/item emas.</p>
           <div class="upload-zone">
-            <input id="imageInput" type="file" accept="image/*" capture="environment" />
-            <img id="previewImg" alt="Preview surat" hidden />
+            <label>Gambar Depan Surat</label>
+            <input id="imageInput" type="file" accept="image/*" />
+            <img id="previewImg" alt="Preview depan surat" hidden />
           </div>
-          <button class="secondary-btn" id="ocrBtn">Jalankan Vision OCR (placeholder)</button>
+          <div class="upload-zone">
+            <label>Gambar Belakang Surat</label>
+            <input id="imageBackInput" type="file" accept="image/*" />
+            <img id="previewBackImg" alt="Preview belakang surat" hidden />
+          </div>
+          <button class="secondary-btn" id="ocrBtn">📸 Imbas & Isi Borang Automatik</button>
         </section>
 
         <section class="card">
@@ -108,9 +131,10 @@
             <label>Nama<input id="fName" /></label>
             <label>No IC<input id="fIc" /></label>
             <label>No Telefon<input id="fPhone" /></label>
-            <label>Pinjaman (RM)<input id="fPrincipal" type="number" min="0" step="0.01" /></label>
+            <label>Jumlah Pembiayaan (RM)<input id="fPrincipal" type="number" min="0" step="0.01" /></label>
+            <label>Jumlah Marhun (RM)<input id="fMarhunTotal" type="number" min="0" step="0.01" readonly /></label>
             <label>Harga Emas Semasa / gram (RM)<input id="fGoldPrice" type="number" min="0" step="0.01" /></label>
-            <label>Kadar Upah (%)<input id="fRate" type="number" min="0" step="0.01" value="0.75" /></label>
+            <label>Kadar Upah / Keuntungan (%)<input id="fRate" type="number" min="0" step="0.01" value="0.75" /></label>
             <label>Mode Upah<select id="fRateMode"><option value="month">Sebulan</option><option value="year">Setahun</option></select></label>
             <label>Tarikh Mula<input id="fStartDate" type="date" /></label>
             <label>Tempoh (bulan)<input id="fTenure" type="number" min="1" value="6" /></label>
@@ -122,6 +146,26 @@
         </section>
       </section>
 
+      <section class="page" id="page-profile">
+        <section class="card">
+          <h2>Profile Customer</h2>
+          <label>Username<input id="profileUsername" readonly /></label>
+          <label>Email<input id="profileEmail" type="email" /></label>
+          <label>Nama<input id="profileName" /></label>
+          <label>No Telefon<input id="profilePhone" /></label>
+          <p class="muted">Username tak boleh edit. Email, nama dan phone boleh update.</p>
+          <button class="primary-btn" id="saveProfileBtn">Save Profile</button>
+        </section>
+      </section>
+
+
+      <section class="page" id="page-history">
+        <section class="card">
+          <h2>History Bayaran & Transaksi</h2>
+          <p class="muted">Semua rekod bayaran upah, tebus keluar dan transaksi surat.</p>
+          <div id="historyList" class="history"></div>
+        </section>
+      </section>
       <section class="page" id="page-harga">
         <section class="card">
           <div class="section-title">
@@ -149,7 +193,13 @@
           </select>
           <label>Berat Emas (gram)</label>
           <input id="goldWeightInput" type="number" min="0" step="0.01" placeholder="Contoh: 20" />
-          <button class="primary-btn" id="goldQuickCalcBtn">Kira Nilai Marhun</button>
+          <label>Pilihan Pembiayaan (LTV)</label>
+          <select id="goldLtvSelect">
+            <option value="0.80" selected>80%</option>
+            <option value="0.75">75%</option>
+            <option value="0.70">70%</option>
+          </select>
+          <button class="primary-btn" id="goldQuickCalcBtn">Kira Nilai Marhun & Pembiayaan</button>
           <div id="goldQuickResult" class="result-box muted">Pilih bank, purity dan berat.</div>
         </section>
       </section>
@@ -160,7 +210,8 @@
       <button class="nav-btn" data-nav="senarai">📋<span>Surat</span></button>
       <button class="nav-btn" data-nav="upload">📸<span>Upload</span></button>
       <button class="nav-btn" data-nav="kiraan">🧮<span>Kira</span></button>
-      <button class="nav-btn" data-nav="harga">🏦<span>Harga</span></button>
+      <button class="nav-btn" data-nav="history">🧾<span>History</span></button>
+      <button class="nav-btn" data-nav="profile">👤<span>Profil</span></button>
     </nav>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ms-MY">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d2b5e" />
+  <title>Staff Panel — Ar-Rahnu Pro</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body data-role="staff">
+  <script src="./auth-guard.js"></script>
+  <div class="app-shell staff-app">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Ar-Rahnu Pro</p>
+        <h1 id="staffTitle">Staff Panel</h1>
+      </div>
+      <button class="icon-btn" id="staffRefreshBtn">Refresh</button><button class="icon-btn" onclick="arrahnuLogout()">Logout</button>
+    </header>
+
+    <main>
+      <section class="staff-panel active" id="staff-overview">
+        <div class="stats-grid staff-metrics" id="staffMetrics"></div>
+
+        <section class="card">
+          <h2>Status Surat</h2>
+          <div id="ticketStatusChart" class="bar-chart"></div>
+        </section>
+
+        <section class="card">
+          <h2>Nilai Operasi</h2>
+          <div id="valueChart" class="bar-chart"></div>
+        </section>
+
+        <section class="card">
+          <h2>Trend 7 Hari</h2>
+          <div id="dailyChart" class="bar-chart horizontal-chart"></div>
+        </section>
+      </section>
+
+      <section class="staff-panel" id="staff-surat">
+        <section class="card">
+          <h2>Manage Surat</h2>
+          <div class="toolbar">
+            <input id="staffTicketSearch" type="search" placeholder="Cari no surat / nama / IC" />
+            <select id="staffStatusFilter">
+              <option value="all">Semua</option>
+              <option value="active">Aktif</option>
+              <option value="warning">Amaran</option>
+              <option value="overdue">Lewat</option>
+              <option value="redeemed">Selesai</option>
+            </select>
+          </div>
+          <div id="staffTicketList" class="staff-table"></div>
+        </section>
+      </section>
+
+      <section class="staff-panel" id="staff-customers">
+        <section class="card">
+          <h2>Manage Customer</h2>
+          <div class="toolbar">
+            <input id="staffCustomerSearch" type="search" placeholder="Cari customer / IC / phone" />
+            <button class="secondary-btn compact-btn" id="autoApproveBtn">Auto ON</button>
+          </div>
+          <p class="muted">MVP: customer dari upload surat dianggap auto-approved. Bila registration siap, sini ada approve/reject.</p>
+          <div id="staffCustomerList" class="staff-table"></div>
+        </section>
+      </section>
+
+      <section class="staff-panel" id="staff-reports">
+        <section class="card">
+          <h2>Report Customer</h2>
+          <div id="customerReport" class="report-box"></div>
+        </section>
+        <section class="card">
+          <h2>Report Surat</h2>
+          <div id="ticketReport" class="report-box"></div>
+        </section>
+        <section class="card">
+          <h2>Ringkasan Operasi</h2>
+          <div id="opsReport" class="meta-grid"></div>
+        </section>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn staff-tab active" data-tab="overview">📊<span>Overview</span></button>
+      <button class="nav-btn staff-tab" data-tab="surat">📋<span>Surat</span></button>
+      <button class="nav-btn staff-tab" data-tab="customers">👥<span>Customer</span></button>
+      <button class="nav-btn staff-tab" data-tab="reports">📈<span>Report</span></button>
+    </nav>
+  </div>
+
+  <dialog id="ticketDialog" class="staff-dialog">
+    <form method="dialog" id="ticketForm">
+      <h2>Detail Surat</h2>
+      <div id="ticketDialogBody"></div>
+      <div class="dialog-actions">
+        <button class="secondary-btn" value="cancel">Tutup</button>
+        <button class="danger-btn" id="deleteTicketDialogBtn" value="default">Delete Surat</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="customerDialog" class="staff-dialog">
+    <form method="dialog" id="customerForm">
+      <h2>Detail Customer</h2>
+      <input id="editCustomerId" type="hidden" />
+      <div id="customerDialogSummary"></div>
+      <label>Nama<input id="editCustomerName" /></label>
+      <label>IC<input id="editCustomerIc" /></label>
+      <label>Phone<input id="editCustomerPhone" /></label>
+      <label>Alamat<input id="editCustomerAddress" /></label>
+      <div class="dialog-actions">
+        <button class="secondary-btn" value="cancel">Tutup</button>
+        <button class="primary-btn" id="saveCustomerEditBtn" value="default">Save</button>
+      </div>
+      <button class="danger-btn" id="deleteCustomerDialogBtn" value="button">Delete Customer</button>
+    </form>
+  </dialog>
+
+  <script src="./staff.js"></script>
+</body>
+</html>

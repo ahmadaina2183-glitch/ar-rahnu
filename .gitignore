@@ -8,3 +8,7 @@ backend/uploads/*
 *.sqlite-wal
 .DS_Store
 .env
+
+# Local runtime state (do not publish)
+backend/auth-users.json
+backend/admin-state.json
