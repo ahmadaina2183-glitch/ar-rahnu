@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ms-MY">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Redirecting — Ar-Rahnu Pro</title>
+  <script>
+    (function () {
+      var base = '/ar-rahnu/';
+      var path = window.location.pathname || '';
+      var target = base;
+      if (path.endsWith('/login') || path.endsWith('/login/')) target = base + 'login.html';
+      if (path.endsWith('/admin') || path.endsWith('/admin/')) target = base + 'admin.html';
+      if (path.endsWith('/staff') || path.endsWith('/staff/')) target = base + 'staff.html';
+      window.location.replace(target + window.location.search + window.location.hash);
+    })();
+  </script>
+  <meta http-equiv="refresh" content="0; url=/ar-rahnu/" />
+</head>
+<body>
+  <p>Redirecting to <a href="/ar-rahnu/">Ar-Rahnu Pro</a>…</p>
+</body>
+</html>
