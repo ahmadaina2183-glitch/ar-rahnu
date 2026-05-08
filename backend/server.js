@@ -899,8 +899,12 @@ app.post('/api/tickets/:id/pay-upah', async (req, res) => {
     const requestedAmount = Number(body.amount || 0);
     const amount = Number(Math.max(0, requestedAmount).toFixed(2));
     if (amount <= 0) return res.status(400).json({ ok: false, error: 'Jumlah bayaran upah tidak sah' });
-    const upahPaid = Number(Math.min(amount, outstandingBefore).toFixed(2));
-    const principalReduction = Number(Math.max(0, amount - outstandingBefore).toFixed(2));
+    // Payment allocation rule:
+    // 1) Bayar upah semasa dahulu.
+    // 2) Jika bayar lebih daripada upah semasa, lebihan terus tolak principal.
+    // 3) Lebihan TIDAK auto-bayar future/upah 6 bulan.
+    const upahPaid = Number(Math.min(amount, currentDueBefore).toFixed(2));
+    const principalReduction = Number(Math.max(0, amount - currentDueBefore).toFixed(2));
     const paidAfter = Number((paidBefore + upahPaid).toFixed(2));
     const currentDueAfter = Math.max(0, Number((currentDueBefore - upahPaid).toFixed(2)));
     const blockOutstandingAfter = Number(Math.max(0, blockAmount - paidAfter).toFixed(2));
@@ -918,7 +922,7 @@ app.post('/api/tickets/:id/pay-upah', async (req, res) => {
         cash_out: 0,
         item_ids: [],
         meta: {
-          formula: 'principal * monthlyRate; paid by 6-month block with installments allowed',
+          formula: 'payment clears current upah first; excess reduces principal; 6-month balance shown separately',
           blockNo,
           periodStart,
           periodEnd,
