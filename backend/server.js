@@ -893,12 +893,17 @@ app.post('/api/tickets/:id/pay-upah', async (req, res) => {
       .filter((tx) => tx.type === 'Bayar Upah' && tx.meta?.periodStart === periodStart)
       .reduce((a, tx) => a + Number(tx.upahAmount || tx.meta?.upahPaid || tx.totalPaid || 0), 0);
     const outstandingBefore = Math.max(0, Number((blockAmount - paidBefore).toFixed(2)));
+    const elapsedDays = Math.max(0, Math.ceil((Date.now() - new Date(periodStart).getTime()) / (1000 * 60 * 60 * 24)));
+    const accruedCurrent = Number(Math.min(blockAmount, (monthlyAmount / 30) * elapsedDays).toFixed(2));
+    const currentDueBefore = Math.max(0, Number((accruedCurrent - paidBefore).toFixed(2)));
     const requestedAmount = Number(body.amount || 0);
     const amount = Number(Math.max(0, requestedAmount).toFixed(2));
     if (amount <= 0) return res.status(400).json({ ok: false, error: 'Jumlah bayaran upah tidak sah' });
     const upahPaid = Number(Math.min(amount, outstandingBefore).toFixed(2));
     const principalReduction = Number(Math.max(0, amount - outstandingBefore).toFixed(2));
     const paidAfter = Number((paidBefore + upahPaid).toFixed(2));
+    const currentDueAfter = Math.max(0, Number((currentDueBefore - upahPaid).toFixed(2)));
+    const blockOutstandingAfter = Number(Math.max(0, blockAmount - paidAfter).toFixed(2));
     const status = paidAfter + 0.009 >= blockAmount ? 'completed' : 'partial';
     const paidUntil = status === 'completed' ? periodEnd : null;
 
@@ -927,8 +932,11 @@ app.post('/api/tickets/:id/pay-upah', async (req, res) => {
           blockAmount,
           paidBefore: Number(paidBefore.toFixed(2)),
           paidAfter,
-          outstandingAfter: Number(Math.max(0, blockAmount - paidAfter).toFixed(2)),
-          note: status === 'completed' ? 'Blok upah 6 bulan selesai. Surat update ke blok seterusnya.' : 'Bayaran ansuran upah. Blok 6 bulan belum selesai.'
+          currentDueBefore,
+          currentDueAfter,
+          outstandingAfter: currentDueAfter,
+          blockOutstandingAfter,
+          note: status === 'completed' ? 'Blok upah 6 bulan selesai. Surat update ke blok seterusnya.' : 'Bayaran upah semasa/ansuran. Baki upah semasa dikira selepas tolak bayaran.'
         },
         created_at: now
       });
