@@ -277,23 +277,35 @@ function summarizeGoldNews(title = '', description = '') {
 }
 app.get('/api/news/gold', async (_req, res) => {
   try {
-    const query = encodeURIComponent('gold price war global economy catalyst OR geopolitics');
-    const url = `https://news.google.com/rss/search?q=${query}&hl=en-MY&gl=MY&ceid=MY:en`;
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 8000);
-    const response = await fetch(url, { signal: ctrl.signal, headers: { 'User-Agent': 'ArRahnuPro/1.0' } });
-    clearTimeout(timer);
-    if (!response.ok) throw new Error(`News source ${response.status}`);
-    const xml = await response.text();
-    const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)].slice(0, 8).map((m) => {
-      const raw = m[1];
-      const title = tagValue(raw, 'title').replace(/\s+-\s+[^-]+$/, '').trim();
-      const link = tagValue(raw, 'link');
-      const publishedAt = tagValue(raw, 'pubDate');
-      const description = tagValue(raw, 'description');
-      return { title, link, publishedAt, summary: summarizeGoldNews(title, description), tag: 'Gold Catalyst' };
-    }).filter((x) => x.title && x.link);
-    res.json({ ok: true, updatedAt: new Date().toISOString(), source: 'Google News RSS', items });
+    const feeds = [
+      { tag: 'Global Gold', q: 'gold price war global economy catalyst OR geopolitics', hl: 'en-MY', ceid: 'MY:en' },
+      { tag: 'Malaysia Gold', q: 'harga emas Malaysia ar rahnu emas dunia ringgit geopolitik', hl: 'ms-MY', ceid: 'MY:ms' }
+    ];
+    const allItems = [];
+    for (const feed of feeds) {
+      const query = encodeURIComponent(feed.q);
+      const url = `https://news.google.com/rss/search?q=${query}&hl=${feed.hl}&gl=MY&ceid=${feed.ceid}`;
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 8000);
+      const response = await fetch(url, { signal: ctrl.signal, headers: { 'User-Agent': 'ArRahnuPro/1.0' } });
+      clearTimeout(timer);
+      if (!response.ok) continue;
+      const xml = await response.text();
+      allItems.push(...[...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)].slice(0, 6).map((m) => {
+        const raw = m[1];
+        const title = tagValue(raw, 'title').replace(/\s+-\s+[^-]+$/, '').trim();
+        const link = tagValue(raw, 'link');
+        const publishedAt = tagValue(raw, 'pubDate');
+        const description = tagValue(raw, 'description');
+        return { title, link, publishedAt, summary: summarizeGoldNews(title, description), tag: feed.tag };
+      }).filter((x) => x.title && x.link));
+    }
+    const seen = new Set();
+    const items = allItems
+      .sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0))
+      .filter((x) => { const key = x.title.toLowerCase(); if (seen.has(key)) return false; seen.add(key); return true; })
+      .slice(0, 8);
+    res.json({ ok: true, updatedAt: new Date().toISOString(), source: 'Google News RSS: Global + Malaysia', items });
   } catch (err) {
     res.json({ ok: true, updatedAt: new Date().toISOString(), source: 'fallback', items: [
       { title: 'Gold watch: geopolitik, USD dan kadar faedah kekal catalyst utama', summary: 'Pantau perang, inflasi, keputusan Fed dan pergerakan USD kerana semua ini boleh gerakkan emas.', tag: 'Gold Catalyst', link: '' },

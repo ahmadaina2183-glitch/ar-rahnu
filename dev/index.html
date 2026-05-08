@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0d2b5e" />
   <title>Ar-Rahnu Pro</title>
   <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="stylesheet" href="./styles.css?v=20260509-news" />
+  <link rel="stylesheet" href="./styles.css?v=20260509-news2" />
 </head>
 <body data-role="customer">
   <script src="./auth-guard.js?v=20260508-backbtn"></script>
@@ -35,14 +35,14 @@
           <h2>Upah Overview</h2>
           <div id="upahOverview" class="meta-grid"></div>
         </section>
-        <section class="card news-card">
-          <div class="section-title"><h2>Latest News</h2><button class="link-btn" id="refreshNewsBtn" type="button">Refresh</button></div>
-          <p class="muted news-subtitle">Isu global, perang, catalyst & sentimen emas</p>
-          <div id="latestNewsList" class="news-list"><p class="muted">Loading news emas...</p></div>
-        </section>
         <section class="card">
           <div class="section-title"><h2>Surat Aktif</h2><button class="link-btn" data-nav="senarai">Lihat semua</button></div>
           <div id="activeTickets" class="ticket-list"></div>
+        </section>
+        <section class="card news-card">
+          <div class="section-title"><h2>Latest News</h2><button class="link-btn" id="refreshNewsBtn" type="button">Refresh</button></div>
+          <p class="muted news-subtitle">Isu global, perang, catalyst & sentimen emas global + Malaysia</p>
+          <div id="latestNewsList" class="news-list"><p class="muted">Loading news emas...</p></div>
         </section>
       </section>
 
@@ -229,6 +229,6 @@
     };
   </script>
   <script type="module" src="./supabase-adapter.js"></script>
-  <script src="./app.js?v=20260509-news"></script>
+  <script src="./app.js?v=20260509-news2"></script>
 </body>
 </html>
