@@ -1,11 +1,12 @@
 const $ = (id) => document.getElementById(id);
+const API_BASE = 'https://arrahnu.116.203.111.60.sslip.io';
 const rm = (n) => `RM ${Number(n || 0).toLocaleString('ms-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const dateMs = (v) => v ? new Date(v).toLocaleDateString('ms-MY') : '-';
 
 let state = { metrics: {}, tickets: [], customers: [] };
 
 async function apiJson(url, options = {}) {
-  const res = await fetch(url, { headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, ...options });
+  const res = await fetch(`${API_BASE}${url}`, { headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, ...options });
   const json = await res.json().catch(() => ({ ok: false, error: 'Invalid JSON response' }));
   if (!res.ok || json.ok === false) throw new Error(json.error || `API error ${res.status}`);
   return json;

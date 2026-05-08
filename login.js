@@ -1,4 +1,6 @@
 const $ = (id) => document.getElementById(id);
+const API_BASE = 'https://arrahnu.116.203.111.60.sslip.io';
+const APP_BASE = '/ar-rahnu/';
 let role = 'customer';
 let registerMode = false;
 
@@ -30,7 +32,7 @@ async function submitAuth() {
   $('loginBtn').disabled = true;
   $('loginBtn').textContent = registerMode ? 'Registering...' : 'Checking...';
   try {
-    const url = registerMode ? '/api/auth/register' : '/api/auth/login';
+    const url = API_BASE + (registerMode ? '/api/auth/register' : '/api/auth/login');
     const payload = role === 'customer'
       ? { role, name: $('regName').value, username: $('regUsername')?.value, phone: $('regPhone').value, email: $('loginEmail').value, password: $('loginPassword').value }
       : { role, pin: $('loginPin').value };
@@ -38,7 +40,7 @@ async function submitAuth() {
     const json = await res.json();
     if (!res.ok || json.ok === false) throw new Error(json.error || 'Login gagal');
     localStorage.setItem('arrahnu_auth', JSON.stringify({ token: json.token, role: json.role, loginAt: Date.now() }));
-    location.href = json.redirect;
+    location.href = APP_BASE + String(json.redirect || '/index.html').replace(/^\//, '');
   } catch (err) {
     alert(err.message);
   } finally {
